@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  BARBER
+}
+
+enum QueueStatus {
+  WAITING
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  name      String
+  role      Role     @default(BARBER)
+  isActive  Boolean  @default(true)
+  isOnline  Boolean  @default(false) // Only relevant for barbers
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  queueItems QueueItem[]
+}
+
+model Service {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Decimal  @db.Decimal(10, 2)
+  avgDuration Int      // in minutes
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  queueItems QueueItem[]
+}
+
+model QueueItem {
+  id          Int         @id @default(autoincrement())
+  clientName  String
+  clientPhone String
+  status      QueueStatus @default(WAITING)
+  
+  barberId    Int
+  barber      User        @relation(fields: [barberId], references: [id])
+  
+  serviceId   Int
+  service     Service     @relation(fields: [serviceId], references: [id])
+
+  startTime   DateTime?
+  endTime     DateTime?
+  
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
