@@ -32,6 +32,20 @@ export class UsersService {
     });
   }
 
+  findBarbers() {
+    return this.prisma.user.findMany({
+      where: { role: 'BARBER', isActive: true },
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        role: true,
+        isActive: true,
+        isOnline: true,
+      },
+    });
+  }
+
   findOne(id: number) {
     return this.prisma.user.findUnique({
       where: { id },
@@ -54,9 +68,20 @@ export class UsersService {
     });
   }
 
-  remove(id: number) {
-    return this.prisma.user.delete({
-      where: { id },
-    });
+  async remove(id: number) {
+    try {
+      return await this.prisma.user.delete({
+        where: { id },
+      });
+    } catch (error: any) {
+      // P2003: Foreign key constraint failed
+      if (error.code === 'P2003' || error.message?.includes('Foreign key') || error.toString().includes('Foreign key')) {
+        return this.prisma.user.update({
+          where: { id },
+          data: { isActive: false },
+        });
+      }
+      throw error;
+    }
   }
 }

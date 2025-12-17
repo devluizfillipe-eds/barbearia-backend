@@ -13,6 +13,11 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @Get('barbers')
+  findBarbers() {
+    return this.usersService.findBarbers();
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Get()
   findAll() {

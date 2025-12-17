@@ -36,9 +36,21 @@ export class ServicesService {
     });
   }
 
-  remove(id: number) {
-    return this.prisma.service.delete({
-      where: { id },
-    });
+  async remove(id: number) {
+    try {
+      return await this.prisma.service.delete({
+        where: { id },
+      });
+    } catch (error: any) {
+      console.log('Error deleting service:', error);
+      // P2003: Foreign key constraint failed
+      if (error.code === 'P2003' || error.message?.includes('Foreign key') || error.toString().includes('Foreign key')) {
+        return this.prisma.service.update({
+          where: { id },
+          data: { isActive: false },
+        });
+      }
+      throw error;
+    }
   }
 }
