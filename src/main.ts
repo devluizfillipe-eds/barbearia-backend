@@ -8,7 +8,11 @@ async function bootstrap() {
   
   // Habilitar CORS para permitir requisições do frontend
   app.enableCors({
-    origin: '*', // Em produção, substitua '*' pela URL do seu frontend (ex: 'http://localhost:3001')
+    origin: [
+      'http://localhost:3001',
+      'https://bozosbarbeiros.vercel.app',
+      'https://*.vercel.app', // Preview deployments
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
